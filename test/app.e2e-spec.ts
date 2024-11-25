@@ -250,7 +250,6 @@ describe('App e2e', () => {
             Authorization: 'Bearer $S{userAt}',
           })
           .expectStatus(HttpStatus.NOT_FOUND)
-          .inspect();
       });
     });
   });

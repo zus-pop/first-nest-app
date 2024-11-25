@@ -15,13 +15,11 @@ export class RedisService
   }
 
   async onModuleInit(): Promise<void> {
-    await this.on('error', (err) => {
+    this.on('error', (err) => {
       console.error(err);
-    })
-      .on('connect', () => {
-        console.log('Connected to Redis');
-      })
-      .connect();
+    }).on('connect', () => {
+      console.log('Connected to Redis');
+    });
   }
 
   async onModuleDestroy(): Promise<void> {

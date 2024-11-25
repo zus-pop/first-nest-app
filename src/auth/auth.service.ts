@@ -34,11 +34,9 @@ export class AuthService {
 
     if (!isMatch) throw new ForbiddenException('Password is incorrect');
 
-    await this.redisService.setex(
-      `user:${user.email}`,
-      30,
-      JSON.stringify(user),
-    );
+    this.redisService
+      .set(`user:${user.email}`, JSON.stringify(user), 'EX', 30, 'NX')
+      .then((value) => console.log(value));
 
     return this.signToken({
       userId: user.id,
