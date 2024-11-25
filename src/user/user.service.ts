@@ -4,7 +4,7 @@ import { EditUserDto } from './dto';
 
 @Injectable()
 export class UserService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   async editUser(id: number, editUserDto: EditUserDto) {
     return await this.prismaService.user.update({

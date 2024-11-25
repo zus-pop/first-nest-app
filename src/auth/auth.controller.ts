@@ -7,7 +7,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
-  
+
   @HttpCode(HttpStatus.OK)
   @Post('login')
   login(@Body() dto: AuthDTO) {

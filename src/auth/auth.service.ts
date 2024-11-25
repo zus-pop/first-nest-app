@@ -4,28 +4,41 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as argon from 'argon2';
 import { PrismaService } from '../prisma/prisma.service';
+import { RedisService } from '../redis/redis.service';
 import { AuthDTO } from './dto';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private prisma: PrismaService,
-    private jwtService: JwtService,
-    private configService: ConfigService,
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+    private readonly redisService: RedisService,
   ) {}
 
   async login({ email, password }: AuthDTO) {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    const cache = await this.redisService.getValue<User>(`user:${email}`);
+
+    const user =
+      cache ||
+      (await this.prisma.user.findUnique({
+        where: {
+          email,
+        },
+      }));
 
     if (!user) throw new ForbiddenException('Email does not exist');
 
     const isMatch = await argon.verify(user.hash, password);
 
     if (!isMatch) throw new ForbiddenException('Password is incorrect');
+
+    await this.redisService.setex(
+      `user:${user.email}`,
+      30,
+      JSON.stringify(user),
+    );
 
     return this.signToken({
       userId: user.id,
