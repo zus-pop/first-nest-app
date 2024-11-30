@@ -13,7 +13,7 @@ export class CronService {
 
   @Cron(CronExpression.EVERY_SECOND, {
     name: 'testJob',
-    disabled: false,
+    disabled: true,
   })
   testJob() {
     const job = this.schedulerRegistry.getCronJob('testJob');

@@ -9,15 +9,21 @@ import { UserService } from './user.service';
 @ApiTags('User')
 @Controller('users')
 @ApiBearerAuth()
-@UseGuards(JwtGuard)
 export class UserController {
   constructor(private userService: UserService) {}
   @Get('me')
+  @UseGuards(JwtGuard)
   getMe(@GetMe() user: User) {
     return user;
   }
 
+  @Get()
+  findAll() {
+    return this.userService.findAll();
+  }
+
   @Patch()
+  @UseGuards(JwtGuard)
   editUser(@GetMe('id') id: number, @Body() editUserDto: EditUserDto) {
     return this.userService.editUser(id, editUserDto);
   }

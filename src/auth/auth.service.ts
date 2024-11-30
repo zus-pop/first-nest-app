@@ -14,29 +14,20 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    private readonly redisService: RedisService,
   ) {}
 
   async login({ email, password }: AuthDTO) {
-    const cache = await this.redisService.getValue<User>(`user:${email}`);
-
-    const user =
-      cache ||
-      (await this.prisma.user.findUnique({
-        where: {
-          email,
-        },
-      }));
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
 
     if (!user) throw new ForbiddenException('Email does not exist');
 
     const isMatch = await argon.verify(user.hash, password);
 
     if (!isMatch) throw new ForbiddenException('Password is incorrect');
-
-    this.redisService
-      .set(`user:${user.email}`, JSON.stringify(user), 'EX', 30, 'NX')
-      .then((value) => console.log(value));
 
     return this.signToken({
       userId: user.id,
